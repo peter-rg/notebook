@@ -3,10 +3,11 @@ import { useState } from 'react'
 import noteService from './services/notes'
 import Notification from './components/Notification'
 import { Footer } from './components/Footer'
-import { Note } from './components/Note'
+import Note from './components/Note'
 import LoginForm from './components/LoginForm'
 import Togglable from './components/Togglable'
 import NoteForm from './components/NoteForm'
+import login from './services/login'
 
 export default function App() {
   const [user, setUser] = useState(null)
@@ -35,6 +36,21 @@ export default function App() {
   const showError =(text) => {
     setErrorMessage(text)
     setTimeout(() => setErrorMessage(null),4000)
+  }
+
+  const handleLogin = async(newUser) => {
+    try {
+      const savedUser = await login(newUser)
+      setUser(savedUser)
+      localStorage.setItem('loggedUser', JSON.stringify(savedUser))
+      noteService.setToken(savedUser.token)
+    } catch (error) {
+      showError(error.response?.data?.error)
+    }
+  }
+  const handleLogout = () => {
+    localStorage.removeItem('loggedUser')
+    setUser(null)
   }
 
   const addNote =(noteObject) => {
@@ -84,7 +100,7 @@ export default function App() {
 
   const loginForm = () => (
     <Togglable label ="Login">
-      <LoginForm setUser={setUser} showError={showError}/>
+      <LoginForm loginUser = {handleLogin}/>
     </Togglable>
   )
   return (
@@ -98,7 +114,9 @@ export default function App() {
             {loginForm()}
           </>
           : <>
-            <h2>{user.name} logged-in</h2>
+            <h2>{user.name} logged-in 
+              <button onClick={handleLogout}>Logout</button>
+            </h2>
             {noteForm()}
           </>
       }

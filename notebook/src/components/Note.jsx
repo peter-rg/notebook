@@ -1,4 +1,4 @@
-export const Note = ({ note, toggleImportance }) => {
+const Note = ({ note, toggleImportance }) => {
   const label =note.important
     ? 'make not important'
     : 'make important'
@@ -9,3 +9,4 @@ export const Note = ({ note, toggleImportance }) => {
     </li>
   )
 }
+export default Note
