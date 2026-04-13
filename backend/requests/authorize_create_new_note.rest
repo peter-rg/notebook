@@ -1,0 +1,8 @@
+Post http://localhost:3001/api/notes
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InJsdSIsImlkIjoiNjlkZDVmN2E0OGJjYzg1MGY5YzU0N2ViIiwiaWF0IjoxNzc2MTE1NjIxLCJleHAiOjE3NzYxMTU2ODF9.xGZVKQY3r1PQQ8K9Pzesz4ryVgFojWxvITpA2jZL5Ls
+
+{
+  "content": "SPA bgfcvbnmased authentication hced",
+  "important": false
+}

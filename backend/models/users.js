@@ -4,6 +4,7 @@ const userSchema = new Schema({
   name: String,
   username: {
     type: String,
+    minlength: 3,
     required: true,
     unique: true
   },
