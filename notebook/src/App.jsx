@@ -39,13 +39,13 @@ export default function App() {
     noteService
       .update(id, changedNote)
       .then(updatedNote=>{
-        console.log("Response from server:", updatedNote)
+        // console.log("Response from server:", updatedNote)
         setNotes(prevNotes=>
           prevNotes.map(note => note.id === id ? updatedNote: note)
         )
       })
       .catch(err => {
-        console.error("Update failed", err)
+        // console.error("Update failed", err)
         setErrorMessage(`The note '${note.content}' is not in server`)
 
         setTimeout(()=>{

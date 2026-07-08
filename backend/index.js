@@ -1,5 +1,5 @@
 const express = require('express')
-const cors = require('cors')
+const path = require('path')
 
 let notes = [  
   {    id: "1",    content: "HTML is easy",    important: true  },  
@@ -8,7 +8,9 @@ let notes = [
 ]
 
 const app = express()
-app.use(cors())
+
+app.use(express.static('dist'))
+
 app.get("/", (req, res)=>{
   res.send("<h1>Hello from express!</h1>")
 })
@@ -70,7 +72,7 @@ app.post('/api/notes', (req,res)=>{
 
   notes = notes.concat(note)
 
-  console.log("note:", note)
+  // console.log("note:", note)
   res.json(note)
 })
 
@@ -82,7 +84,11 @@ const unknownEndpoint = (req,res)=>{
 
 app.use(unknownEndpoint)
 
+app.get('/{*splat}', (req,res)=>{
+  res.sendFile(path.join(__dirname, 'dist', 'index.html'));
+})
+
 const PORT = process.env.PORT || 3000
 app.listen(PORT, ()=>{
-  console.log("Server running on port", PORT)
+  // console.log("Server running on port", PORT)
 })

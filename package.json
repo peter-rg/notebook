@@ -5,8 +5,9 @@
   "main": "index.js",
   "scripts": {
     "install:all": "cd notebook && npm install && cd ../backend && npm install",
-    "build:frontend": "cd notebook && npm run build",
-    "start": "cd backend && node index.js"
+    "build:ui": "rm -rf backend/dist && cd notebook && npm run build && cp -r dist ../backend",
+    "start": "cd backend && node index.js",
+    "deploy:full": "npm run build:ui && git add . && git commit -m uibuild && git push"
   },
   "keywords": [],
   "author": "",
