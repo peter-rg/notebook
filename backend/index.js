@@ -34,7 +34,23 @@ app.delete('/api/notes/:id', (request, response) => {
 
   response.status(204).end()
 })
+app.put('/api/notes/:id', (req,res)=>{
+  const id = req.params.id
+  const note = notes.find(n =>String(n.id) === String(id))
+  
+  if(!note){
+    return res.status(404).json(
+      {error: "Note not found"}
+    )
+  }
 
+  const updatedNote = {...note, important: !note.important}
+
+  notes = notes.map(note=>String(note.id) === id? updatedNote : note)
+  // console.log('notes:', notes)
+
+  res.status(200).json(updatedNote)
+})
 
 app.use(express.json())
 
@@ -47,7 +63,7 @@ app.post('/api/notes', (req,res)=>{
       })
     }
   const note ={
-    content: body?.content,
+    content: body.content,
     important: body.important || false,
     id: String(notes.length +1)
     }
@@ -55,7 +71,7 @@ app.post('/api/notes', (req,res)=>{
   notes = notes.concat(note)
 
   console.log("note:", note)
-  res.json(notes)
+  res.json(note)
 })
 
 const unknownEndpoint = (req,res)=>{
