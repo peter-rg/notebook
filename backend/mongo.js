@@ -1,8 +1,8 @@
 const mongoose = require('mongoose')
 
 if(process.argv.length <3){
-  console.log("give password as an argument");
-  process.exit(1)  
+  console.log('give password as an argument')
+  process.exit(1)
 }
 
 const password = process.argv[2]
@@ -21,33 +21,33 @@ const noteSchema = new mongoose.Schema({
 const Note = mongoose.model('Note', noteSchema)
 
 const note = new Note({
-  content: "Caro is bothering me!",
+  content: 'Caro is bothering me!',
   important: true,
 })
 
-note.save().then(result=>{
-  console.log("note saved");
-  mongoose.connection.close()  
+note.save().then(() => {
+  console.log('note saved')
+  mongoose.connection.close()
 })
 
 
-       //async practice 
+//async practice
 // const findNotes = async()=>{
 //   try {
-//     const notes = await Note.find({})    
+//     const notes = await Note.find({})
 //     notes.forEach(note=> console.log(note));
-    
+
 //   } catch (error) {
-//     console.log("An error ocuured", error);    
+//     console.log("An error ocuured", error);
 //   }finally{
 //     mongoose.connection.close()
 //   }
 // }
 // findNotes()
 
-Note.find({}).then(result=>{
-  result.forEach(note=>{
-    console.log('note', note);
+Note.find({}).then(result => {
+  result.forEach(note => {
+    console.log('note', note)
   })
   mongoose.connection.close()
 })

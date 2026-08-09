@@ -1,94 +1,116 @@
 const express = require('express')
 const path = require('path')
-
-let notes = [  
-  {    id: "1",    content: "HTML is easy",    important: true  },  
-  {    id: "2",    content: "Browser can execute only JavaScript",    important: false  },  
-  {    id: "3",    content: "GET and POST are the most important methods of HTTP protocol",    important: true  }
-]
+const Note = require('./models/notes')
 
 const app = express()
-
+app.use(express.json())
 app.use(express.static('dist'))
 
-app.get("/", (req, res)=>{
-  res.send("<h1>Hello from express!</h1>")
-})
-app.get("/api/notes/", (req, res)=>{
-  res.json(notes)
+app.get('/', (req, res) => {
+  res.send('<h1>Hello from express!</h1>')
 })
 
-app.get("/api/notes/:id", (req,res)=>{
-  const id = req.params.id
-  const note = notes.find(note => note.id === id)
-  if(note){
-    res.json(note)
+app.get('/api/notes/', (req, res) => {
+  Note.find({}).then(notes => res.json(notes))
+})
+
+app.get('/api/notes/:id', (req,res,next) => {
+  Note.findById(req.params.id)
+    .then(note => {
+      if(note){
+        res.status(200).json(note)
+      }
+      else{
+        res.status(404).json(
+          {
+            message: 'Note not found'
+          }
+        )
+      }
+    })
+    .catch(err => next(err))
+
+})
+
+app.delete('/api/notes/:id', (req, res, next) => {
+  Note.findByIdAndDelete(req.params.id)
+    .then(() => res.status(204).end())
+    .catch(err => next(err))
+})
+
+// notes validation
+const validateNote=(req, res, next) => {
+  const { content } = req.body
+  if(!content){
+    return res.status(400).json({ error: 'kindly provide content property' })
   }
-  else{
-    res.status(404).end()
+  if (typeof content !== 'string') {
+    return res.status(400).json({ error: 'content must be a string' })
   }
-  
-})
-
-app.delete('/api/notes/:id', (request, response) => {
-  const id = request.params.id
-  notes = notes.filter(note => note.id !== id)
-
-  response.status(204).end()
-})
-app.put('/api/notes/:id', (req,res)=>{
-  const id = req.params.id
-  const note = notes.find(n =>String(n.id) === String(id))
-  
-  if(!note){
-    return res.status(404).json(
-      {error: "Note not found"}
-    )
+  if(content.trim().length <5){
+    return res.status(400).json({ error: 'content cannot be less than 5 characters' })
   }
 
-  const updatedNote = {...note, important: !note.important}
+  next()
+}
 
-  notes = notes.map(note=>String(note.id) === id? updatedNote : note)
-  // console.log('notes:', notes)
+app.put('/api/notes/:id', validateNote, (req,res, next) => {
+  const { content, important } = req.body
 
-  res.status(200).json(updatedNote)
+  Note.findById(req.params.id)
+    .then(note => {
+      if(!note){
+        return res.status(404).send({ error: 'note not found' })
+      }
+      note.content = content
+      if(important !== undefined){
+        note.important = important
+      }
+
+      return note.save()
+        .then(updatedNote => res.status(200).json(updatedNote))
+    })
+    .catch(err => next(err))
 })
 
-app.use(express.json())
+app.post('/api/notes', validateNote, (req,res, next) => {
+  const { content, important } = req.body
 
-app.post('/api/notes', (req,res)=>{
-  const body = req.body
-  
-  if(!body?.content){
-    return res.status(400).json({
-      error: "content missing"
-      })
-    }
-  const note ={
-    content: body.content,
-    important: body.important || false,
-    id: String(notes.length +1)
-    }
+  const note =Note({
+    content,
+    important: important || false,
+  })
 
-  notes = notes.concat(note)
-
-  // console.log("note:", note)
-  res.json(note)
+  note.save()
+    .then(savedNote => res.status(200).json(savedNote))
+    .catch(err => next(err))
 })
 
-const unknownEndpoint = (req,res)=>{
+const unknownEndpoint = (req,res) => {
   res.status(404).send({
-    error :"unknown endpoint"
+    error :'unknown endpoint'
   })
 }
 
 app.use(unknownEndpoint)
 
-app.get('/{*splat}', (req,res)=>{
-  res.sendFile(path.join(__dirname, 'dist', 'index.html'));
+app.get('/{*splat}', (req,res) => {
+  res.sendFile(path.join(__dirname, 'dist', 'index.html'))
 })
 
+const errorHandler= (error, req, res, next) => {
+  console.error(error.message)
+
+  if(error.name === 'CastError'){
+    return res.status(400).send({ error: 'Malformatted id' })
+  }
+  if(error.name === 'ValidationError'){
+    return res.status(400).json({ error: error.message })
+  }
+  next(error)
+}
+app.use(errorHandler)
 const PORT = process.env.PORT || 3000
-app.listen(PORT, ()=>{
+app.listen(PORT, () => {
   // console.log("Server running on port", PORT)
 })
