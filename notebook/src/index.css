@@ -1,3 +1,12 @@
+body{
+    background-color: #f5f7fa;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    margin: 0;
+}
+
 h1{
     color: green;
     font-style: italic
@@ -8,14 +17,16 @@ ul {
     width: fit-content;
 }
 .note{
-    color: grey;
+    color: #333;
     padding: 3px;
     font-size: 15px;
 }
 button{
     border-radius: 8px;
     padding-left: 10px;
+    margin: 5px
 }
+
 .error{
     color: red;
     background: lightgray;
@@ -24,4 +35,16 @@ button{
     padding: 10px;
     margin-bottom: 10px;
     width:fit-content;
+}
+
+.note-container{
+    background-color: #fff;
+    border: 1px solid #dcdfe6;
+    border: 10px;
+    padding: 2rem;
+    width: 100%;
+    max-width: 480;
+    box-shadow: 0 4px 8px rgba(0,0,0, 0.08);
+
+
 }
