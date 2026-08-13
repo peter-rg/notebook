@@ -2,32 +2,23 @@ const Note = require('../models/notes')
 const notesRouter = require('express').Router()
 const { validateNote } = require('../utils/middleware')
 
-notesRouter.get('/', (req, res) => {
-  Note.find({}).then(notes => res.json(notes))
+notesRouter.get('/', async(req, res) => {
+  const notes = await Note.find({})
+  res.status(200).json(notes)
 })
 
-notesRouter.get('/:id', (req,res,next) => {
-  Note.findById(req.params.id)
-    .then(note => {
-      if(note){
-        res.status(200).json(note)
-      }
-      else{
-        res.status(404).json(
-          {
-            message: 'Note not found'
-          }
-        )
-      }
-    })
-    .catch(err => next(err))
-
+notesRouter.get('/:id', async(req,res) => {
+  const note = await Note.findById(req.params.id)
+  if(note){
+    return res.status(200).json(note)
+  } else{
+    res.status(404).json({ message : 'Note not found' })
+  }
 })
 
-notesRouter.delete('/:id', (req, res, next) => {
-  Note.findByIdAndDelete(req.params.id)
-    .then(() => res.status(204).end())
-    .catch(err => next(err))
+notesRouter.delete('/:id', async(req, res) => {
+  await Note.findByIdAndDelete(req.params.id)
+  res.status(204).end()
 })
 
 
@@ -50,7 +41,7 @@ notesRouter.put('/:id', validateNote, (req,res, next) => {
     .catch(err => next(err))
 })
 
-notesRouter.post('/', validateNote, (req,res, next) => {
+notesRouter.post('/', validateNote, async(req,res) => {
   const { content, important } = req.body
 
   const note =Note({
@@ -58,9 +49,8 @@ notesRouter.post('/', validateNote, (req,res, next) => {
     important: important || false,
   })
 
-  note.save()
-    .then(savedNote => res.status(201).json(savedNote))
-    .catch(err => next(err))
+  const savedNote = await note.save()
+  res.status(201).json(savedNote)
 })
 
 module.exports = notesRouter
