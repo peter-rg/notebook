@@ -4,9 +4,10 @@ const notesRouter = require('express').Router()
 const { validateNote } = require('../utils/middleware')
 
 notesRouter.get('/', async(req, res) => {
-  const notes = await Note.find({}).populate(
-    'user', {username: 1, name:1}
-  )
+  const notes = await Note.find({})
+    .populate(
+      'user', { username: 1, name:1 }
+    )
   res.status(200).json(notes)
 })
 
@@ -25,38 +26,33 @@ notesRouter.delete('/:id', async(req, res) => {
 })
 
 
-notesRouter.put('/:id', validateNote, (req,res, next) => {
+notesRouter.put('/:id', validateNote, async(req,res) => {
   const { content, important } = req.body
 
-  Note.findById(req.params.id)
-    .then(note => {
-      if(!note){
-        return res.status(404).send({ error: 'note not found' })
-      }
-      note.content = content
-      if(important !== undefined){
-        note.important = important
-      }
-
-      return note.save()
-        .then(updatedNote => res.status(200).json(updatedNote))
-    })
-    .catch(err => next(err))
+  const updatedNote = await Note.findByIdAndUpdate(
+    req.params.id,
+    {content, important},
+    {new: true}
+  )
+  if (!updatedNote){
+    return res.status(404).json({error: "note not found"})
+  }
+  res.status(200).json(updatedNote)
 })
 
 notesRouter.post('/', validateNote, async(req,res) => {
-  const { content, important , userId} = req.body
+  const { content, important , userId } = req.body
 
   const user = await User.findById(userId)
   if(!user){
-    return res.status(400).json({error: 'userid missing or invalid'})
+    return res.status(400).json({ error: 'userid missing or invalid' })
   }
   const note =Note({
     content,
     important: important || false,
     user: user._id
   })
-  
+
   const savedNote = await note.save()
   user.notes = user.notes.concat(savedNote._id)
   await user.save()

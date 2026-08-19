@@ -1,6 +1,7 @@
 const { test, after, beforeEach, describe } = require('node:test')
 const app = require('../app')
 const mongoose = require('mongoose')
+const bcrypt = require('bcrypt')
 const supertest = require('supertest')
 const assert = require('node:assert')
 const Note = require('../models/notes')
@@ -14,13 +15,13 @@ describe('when there is some notes saved initially', () => {
     await Note.deleteMany({})
     await User.deleteMany({})
 
+    const password = await bcrypt.hash("124rdj", 10)
     const user = new User({
-      name: "rymer kim",
+      name: 'rymer kim',
       username: 'ryme7',
-      passwordHash: "12345".split().reverse().copyWithin(2,0,3).join()
+      password
     })
     const savedUser = await user.save()
-    // console.log("first", savedUser)
 
     const noteObjects = initialNotes.map(
       note => new Note({
@@ -59,9 +60,9 @@ describe('when there is some notes saved initially', () => {
   describe('viewing of a specific note', () => {
     test('succeeds with a valid id', async() => {
       const notes = await notesInDb()
-      const noteToView = notes[0]
+      const noteToView = await Note.findById(notes[0].id).populate('user')
 
-      const resultNote = await api.get(`/api/notes/${noteToView.id}`)
+      const resultNote = await api.get(`/api/notes/${notes[0].id}`)
         .expect(200)
         .expect('Content-Type', /application\/json/)
       // match noteToView with the API response
@@ -113,17 +114,17 @@ describe('when there is some notes saved initially', () => {
   })
 
   describe('deletion of a note', () => {
-    // test('succeeds with statuscode 204 if id is valid', async() => {
-    //   const notesAtStart = await notesInDb()
-    //   const noteToDelete = notesAtStart[0]
+    test('succeeds with statuscode 204 if id is valid', async() => {
+      const notesAtStart = await notesInDb()
+      const noteToDelete = notesAtStart[0]
 
-    //   await api.delete(`/api/notes/${noteToDelete.id}`).expect(204)
-    //   const notesAtEnd = await notesInDb()
+      await api.delete(`/api/notes/${noteToDelete.id}`).expect(204)
+      const notesAtEnd = await notesInDb()
 
-    //   const ids = notesAtEnd.map(n => n.id)
-    //   assert(!ids.includes(noteToDelete.id))
-    //   assert.strictEqual(notesAtEnd.length, notesAtStart.length -1)
-    // })
+      const ids = notesAtEnd.map(n => n.id)
+      assert(!ids.includes(noteToDelete.id))
+      assert.strictEqual(notesAtEnd.length, notesAtStart.length -1)
+    })
 
   })
 })
