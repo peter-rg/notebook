@@ -18,7 +18,7 @@ describe('when there is initially one user in db', () => {
     await user.save()
   })
   describe('Creation of user', () => {
-   test('succedes with fresh userName', async() => {
+    test('succedes with fresh userName', async() => {
       const userAtStart = await helper.usersInDb()
       const password = await bcrypt.hash('12345', 10)
       const newUser = {
@@ -50,21 +50,22 @@ describe('when there is initially one user in db', () => {
       assert.strictEqual(usersAtEnd.length, userAtStart.length)
       assert(result.body.error.includes('expected `username` to be unique'))
     })
-    test('fails with statuscode 400 if password is small/missing', async()=>{
+    test('fails with statuscode 400 if password is small/missing', async() => {
       const userWithSmallPassword = {
-        name: "Gregory loka",
-        username: "Grego",
-        password: "27"
+        name: 'Gregory loka',
+        username: 'Grego',
+        password: '27'
       }
       const userWithoutPassword = {
-        name: "jme soay",
-        username: "jacj"
+        name: 'jme soay',
+        username: 'jacj'
       }
-      await api.post('/api/users').send(userWithSmallPassword).expect(400)
+      const response = await api.post('/api/users').send(userWithSmallPassword).expect(400)
       await api.post('/api/users').send(userWithoutPassword).expect(400)
+      assert(response.body.error.includes('password must be at least 3 characters long'))
     })
   })
-  
+
 })
 
 after(async() => await mongoose.connection.close())

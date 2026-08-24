@@ -31,11 +31,11 @@ notesRouter.put('/:id', validateNote, async(req,res) => {
 
   const updatedNote = await Note.findByIdAndUpdate(
     req.params.id,
-    {content, important},
-    {new: true}
+    { content, important },
+    { new: true }
   )
   if (!updatedNote){
-    return res.status(404).json({error: "note not found"})
+    return res.status(404).json({ error: 'note not found' })
   }
   res.status(200).json(updatedNote)
 })

@@ -15,7 +15,7 @@ describe('when there is some notes saved initially', () => {
     await Note.deleteMany({})
     await User.deleteMany({})
 
-    const password = await bcrypt.hash("124rdj", 10)
+    const password = await bcrypt.hash('124rdj', 10)
     const user = new User({
       name: 'rymer kim',
       username: 'ryme7',
