@@ -1,11 +1,9 @@
 import { useEffect, useRef } from 'react'
 import { useState } from 'react'
-import noteService from "./services/notes"
-import login from './services/login'
+import noteService from './services/notes'
 import Notification from './components/Notification'
 import { Footer } from './components/Footer'
 import { Note } from './components/Note'
-import { use } from 'react'
 import LoginForm from './components/LoginForm'
 import Togglable from './components/Togglable'
 import NoteForm from './components/NoteForm'
@@ -18,10 +16,10 @@ export default function App() {
 
   const noteFormRef = useRef()
 
-  useEffect(()=>{
+  useEffect(() => {
     noteService
       .getAll()
-      .then(initialNotes=>{
+      .then(initialNotes => {
         setNotes(initialNotes)})
   },[])
 
@@ -34,36 +32,33 @@ export default function App() {
     }
   }, [])
 
-  const showError =(text)=>{
+  const showError =(text) => {
     setErrorMessage(text)
-
-    setTimeout(()=>setErrorMessage(null),4000)
+    setTimeout(() => setErrorMessage(null),4000)
   }
 
   const addNote =(noteObject) => {
     noteFormRef.current.toggleVisibility()
     noteService
       .create(noteObject, user.token)
-      .then(newObject=>{
+      .then(newObject => {
         setNotes(notes.concat(newObject))
       })
-      .catch(err=>{
-        console.log("first", err)
+      .catch(err => {
         showError(err.response?.data?.error)
       })
   }
-  const handleNoteChange =event => setNewNote(event.target.value)
-  
-  const toggleImportanceOf =(id)=>{
-    const note= notes.find(note => note.id ===id)
-    if(!note) return 
 
-    const changedNote = {...note, important: !note.important}
+  const toggleImportanceOf =(id) => {
+    const note= notes.find(note => note.id ===id)
+    if(!note) return
+
+    const changedNote = { ...note, important: !note.important }
     noteService
       .update(id, changedNote)
-      .then(updatedNote=>{
+      .then(updatedNote => {
         // console.log("Response from server:", updatedNote)
-        setNotes(prevNotes=>
+        setNotes(prevNotes =>
           prevNotes.map(note => note.id === id ? updatedNote: note)
         )
       })
@@ -75,7 +70,7 @@ export default function App() {
         if (err.response?.status === 404 || err.response?.status === 400) {
           setNotes(prevNotes => prevNotes.filter(n => n.id !== id))
         }
-        
+
       })
   }
 
@@ -83,36 +78,36 @@ export default function App() {
 
   const noteForm = () => (
     <Togglable label='new note' ref={noteFormRef}>
-      <NoteForm createNote = {addNote} showError={showError}/>
+      <NoteForm createNote = {addNote} showError={showError} />
     </Togglable>
   )
 
   const loginForm = () => (
-    <Togglable label ="Login:" >
-      <LoginForm setUser={setUser} showError={showError} />
-    </Togglable> 
+    <Togglable label ="Login">
+      <LoginForm setUser={setUser} showError={showError}/>
+    </Togglable>
   )
   return (
     <div className='note-container'>
       <h1>Notes</h1>
       <Notification message={errorMessage}/>
-      
+
       {
-        user === null 
+        user === null
           ? <>
-              {loginForm()}
-            </>
+            {loginForm()}
+          </>
           : <>
-              <h2>{user.name} logged-in</h2>
-              {noteForm()}
-            </>    
+            <h2>{user.name} logged-in</h2>
+            {noteForm()}
+          </>
       }
-      
-      <button onClick={()=> setShowAll(!showALl)}>Show {showALl ? "important" : "all"}</button>
+
+      <button onClick={() => setShowAll(!showALl)}>Show {showALl ? 'important' : 'all'}</button>
       <ul>
-        {notesToShow.map(note =><Note key={note.id} note={note} toggleImportance={()=>toggleImportanceOf(note.id)}/>)}
+        {notesToShow.map(note => <Note key={note.id} note={note} toggleImportance={() => toggleImportanceOf(note.id)}/>)}
       </ul>
-     
+
       <Footer/>
     </div>
   )

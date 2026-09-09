@@ -1,4 +1,4 @@
-import axios from "axios"
+import axios from 'axios'
 
 const login = async(user) => {
   const res = await axios.post('/api/login', user)
